@@ -131,7 +131,7 @@ function moveToApplications(callback) {
     }
 
     // move the application bundle
-    const command = `mv ${bundlePath} ${installLocation}`;
+    const command = `cp -R "${bundlePath}" "${installLocation}"`;
     if (needsAuthorization) {
       sudo.exec(command, { name: app.getName() }, moved);
     } else {
