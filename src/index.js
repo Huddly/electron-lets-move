@@ -30,8 +30,8 @@ function isInDownloadsFolder() {
   return exePath.startsWith(downloadsPath);
 }
 
-function preferredInstallLocation() {
-  if (fs.existsSync(userApplicationPath)) {
+function preferredInstallLocation(preferRoot) {
+  if (!preferRoot && fs.existsSync(userApplicationPath)) {
     return userApplicationPath;
   }
   return rootApplicationPath;
@@ -54,12 +54,14 @@ function getDialogMessage(needsAuthorization) {
   return detail;
 }
 
-function moveToApplications(callback) {
+function moveToApplications(opts) {
   let resolve;
   let reject;
+  const callback = typeof(opts) == 'function' ? opts : opts.callback;
   const bundlePath = getBundlePath();
   const fileName = path.basename(bundlePath);
-  const installLocation = path.join(preferredInstallLocation(), fileName);
+  const installLocation = path.join(preferredInstallLocation(opts.preferRoot),
+    fileName);
 
   // We return a promise so that the parent application can await the result.
   // Also support an optional callback for those that prefer a callback style.
@@ -87,7 +89,7 @@ function moveToApplications(callback) {
   }
 
   // Check if the install location needs administrator permissions
-  canWrite(installLocation, (err, isWritable) => {
+  canWrite(preferredInstallLocation(), (err, isWritable) => {
     const needsAuthorization = !isWritable;
 
     // show dialog requesting to move
@@ -131,7 +133,7 @@ function moveToApplications(callback) {
     }
 
     // move the application bundle
-    const command = `cp -R "${bundlePath}" "${installLocation}"`;
+    const command = `cp -Rp "${bundlePath}" "${installLocation}"`;
     if (needsAuthorization) {
       sudo.exec(command, { name: app.getName() }, moved);
     } else {
