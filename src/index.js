@@ -8,6 +8,7 @@ const fs = require('fs');
 const exePath = app.getPath('exe');
 const rootApplicationPath = '/Applications';
 const userApplicationPath = path.join(app.getPath('home'), 'Applications');
+const isInATranslocatedPath = exePath.includes("/AppTranslocation/");
 
 function getBundlePath() {
   const bundleExtension = '.app';
@@ -22,7 +23,7 @@ function canWrite(filePath, callback) {
 }
 
 function isInApplicationsFolder() {
-  return exePath.startsWith(rootApplicationPath) || exePath.startsWith(userApplicationPath);
+  return exePath.startsWith(rootApplicationPath) || exePath.startsWith(userApplicationPath) || isInATranslocatedPath;
 }
 
 function isInDownloadsFolder() {
